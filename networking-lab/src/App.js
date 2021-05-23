@@ -1,84 +1,66 @@
-import logo from './logo.svg'
-import React, { Component } from 'react'
+import React, { useState, useEffect } from 'react'
 import Menu from './components/Menu'
 import Game from './components/Game'
 import axios from 'axios'
 import './App.css'
 
-export class App extends Component {
-  constructor () {
-    super()
-    this.state = {
-      deckId: '',
-      hand: [],
-      playing: false
-    }
-  }
+const App = () => {
+  
+  const [ deckId, setDeckId ] = useState('')
+  const [ hand, setHand ] = useState([])
+  const [ playing, setPlaying ] = useState(false)
 
-  generateDeck = async () => {
+  const generateDeck = async () => {
+
     let newDeck = await axios.get(
       'https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1'
     )
-    this.setState({
-      deckId: newDeck.data.deck_id
-    })
-    this.drawTwo()
-  }
+ 
+    drawTwo(newDeck.data.deck_id)
+  } 
 
-  drawTwo = async () => {
-    this.setState({
-      playing: true
-    })
+
+
+  const drawTwo = async (deck) => {
+    console.log(deck)
 
     let draw = await axios.get(
-      `https://deckofcardsapi.com/api/deck/${this.state.deckId}/draw/?count=2`
-    )
-    draw.data.cards.map(card => {
-      this.setState({
-        hand: this.state.hand.concat(card)
+      `https://deckofcardsapi.com/api/deck/${deck}/draw/?count=2`
+      )
+      draw.data.cards.map(card => {
+        setHand( [...hand, card] )
       })
-    })
+      
+    setDeckId(deck)
+    setPlaying( true )
   }
 
-  drawOne = async () => {
+  const drawOne = async () => {
     let drawOne = await axios.get(
-      `https://deckofcardsapi.com/api/deck/${this.state.deckId}/draw/?count=1`
+      `https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=1`
     )
-    this.setState({
-      hand: this.state.hand.concat(drawOne.data.cards)
-    })
+      setHand( hand.concat(drawOne.data.cards) )
   }
 
-  loadDeck = e => {
-    e.preventDefault()
-    this.drawTwo()
-  }
 
-  handleChange = e => {
-    this.setState({
-      deckId: e.target.value
-    })
-  }
 
-  render () {
-    return (
+  return (
       <div className='dot'>
         <div className='border'>
           <div>
-            <h1 contentEditable spellCheck='false'>
+            <h1 spellCheck='false'>
               Blackjack
             </h1>
-            {this.state.playing ? (
+            { playing ? (
               <Game
-                deckId={this.state.deckId}
-                hand={this.state.hand}
-                drawOne={this.drawOne}
+                deckId = { deckId }
+                hand = { hand }
+                drawOne = { drawOne }
               />
             ) : (
               <Menu
-                generateDeck={this.generateDeck}
-                loadDeck={this.loadDeck}
-                handleChange={this.handleChange}
+                generateDeck={generateDeck}
+                loadDeck={drawTwo}
               />
             )}
           </div>
@@ -86,6 +68,5 @@ export class App extends Component {
       </div>
     )
   }
-}
 
 export default App

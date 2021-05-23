@@ -1,16 +1,19 @@
 import React from 'react'
 
-function Game (props) {
+const Game = (props) => {
+
+   const { deckId, hand, drawOne } = props
+
   return (
     <div>
-      <h4>Deck ID: {props.deckId}</h4>
-      {props.hand.map(card => {
+      <h4>Deck ID: {deckId}</h4>
+      {hand.map(card => {
         return (
           <img src={card.image} alt={card.suit + card.value} key={card.code} />
         )
       })}
       <br />
-      <button onClick={props.drawOne}>Hit Me!</button>
+      <button onClick={() => drawOne() }>Hit Me!</button>
     </div>
   )
 }
